@@ -1,23 +1,27 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function LoginPage() {
-  const { signIn } = useAuth();
+  const { signIn, session, loading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  if (authLoading) return null;
+  if (session) return <Navigate to="/admin" replace />;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setSubmitting(true);
     setError("");
     const { error } = await signIn(email, password);
     if (error) setError(error);
-    setLoading(false);
+    setSubmitting(false);
   };
 
   return (
@@ -51,8 +55,8 @@ export default function LoginPage() {
             />
           </div>
           {error && <p className="text-destructive text-sm">{error}</p>}
-          <Button type="submit" className="w-full gradient-primary" disabled={loading}>
-            {loading ? "Entrando..." : "Entrar"}
+          <Button type="submit" className="w-full gradient-primary" disabled={submitting}>
+            {submitting ? "Entrando..." : "Entrar"}
           </Button>
         </form>
       </div>
